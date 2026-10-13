@@ -8,10 +8,10 @@ Three components work together to manage fan speeds via the `applesmc` kernel mo
 
 | File | Purpose | GUI | Systemd |
 |------|---------|-----|---------|
-| `imac_fan_control.py` | Interactive GUI monitor & control | ✅ Yes | ⚠️ Difficult (no display) |
-| `imac_fan_control_headless.py` | Automatic temp-based control, no GUI | ❌ No | ✅ Yes |
-| Desktop autostart (`.desktop`) | Start GUI on user login | ✅ Yes | N/A |
-| Service files (`.service`) | Start scripts as systemd services | N/A | ✅ Yes |
+| `imac_fan_control.py` | Interactive GUI monitor & control | Yes | Difficult (no display) |
+| `imac_fan_control_headless.py` | Automatic temp-based control, no GUI | No | Yes |
+| Desktop autostart (`.desktop`) | Start GUI on user login | Yes | N/A |
+| Service files (`.service`) | Start scripts as systemd services | N/A | Yes |
 
 ## Quick Start
 
@@ -32,6 +32,7 @@ Run interactively with desktop autostart:
 2. **Auto-start on login (desktop):**
    - Copy `imac-fan-control.desktop` to `~/.config/autostart/`
    - Make executable: `chmod +x ~/.config/autostart/imac-fan-control.desktop`
+   - Update the `Exec=` line in the `.desktop` file to point to your local script path
    - Log out and in, or reboot
 
 ### Option 2: Headless Systemd Service (Automatic)
@@ -72,9 +73,8 @@ Runs as root service; monitors TS0V temp and adjusts fan2 automatically.
 - **Graceful shutdown:** SIGTERM/SIGINT restores fan to automatic mode
 - Requires root (systemd runs as `User=root`)
 
-## File Locations
+## Repository Structure
 
-All files should be placed in `/home/birger/Downloads/`:
 ```
 .
 ├── imac_fan_control.py                    # GUI app
@@ -83,28 +83,40 @@ All files should be placed in `/home/birger/Downloads/`:
 ├── imac-fan-control.service               # GUI systemd (optional, fragile)
 ├── imac-fan-control-headless.service      # Headless systemd (recommended)
 ├── imac-fan-control-gui.service           # GUI systemd (optional, fragile)
-└── README.md                              # This file
+├── .gitignore
+└── README.md
 ```
 
-## Installation for Target Machine
+## Installation
 
-1. **Copy all files** to target at `/home/birger/Downloads/`
+### Clone the Repository
 
-2. **Headless service (recommended):**
-   ```bash
-   sudo cp imac-fan-control-headless.service /etc/systemd/system/
-   sudo systemctl daemon-reload
-   sudo systemctl enable imac-fan-control-headless.service
-   sudo systemctl start imac-fan-control-headless.service
-   ```
+```bash
+git clone https://github.com/BirgerKo/imac-fan-control.git
+cd imac-fan-control
+```
 
-3. **GUI with autostart (optional):**
-   ```bash
-   mkdir -p ~/.config/autostart
-   cp imac-fan-control.desktop ~/.config/autostart/
-   chmod +x ~/.config/autostart/imac-fan-control.desktop
-   # Log out and back in to activate
-   ```
+### For Target Machine
+
+Copy all files to your target location (e.g., `~/imac-fan-control/`).
+
+#### Headless service (recommended)
+```bash
+sudo cp imac-fan-control-headless.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable imac-fan-control-headless.service
+sudo systemctl start imac-fan-control-headless.service
+```
+**Note:** Update the `ExecStart` path in the `.service` file to match your installation location.
+
+#### GUI with autostart (optional)
+```bash
+mkdir -p ~/.config/autostart
+cp imac-fan-control.desktop ~/.config/autostart/
+chmod +x ~/.config/autostart/imac-fan-control.desktop
+# Log out and back in to activate
+```
+**Note:** Update the `Exec=` path in the `.desktop` file to point to your local `imac_fan_control.py` location.
 
 ## Troubleshooting
 
@@ -114,7 +126,7 @@ All files should be placed in `/home/birger/Downloads/`:
 
 ### Service won't start
 - Check logs: `sudo journalctl -u imac-fan-control-headless.service -n 50`
-- Verify path in `.service` file matches actual script location
+- Verify the `ExecStart` path in the `.service` file matches your script location
 - Ensure Python 3 is at `/usr/bin/python3`
 
 ### GUI won't display (systemd)
