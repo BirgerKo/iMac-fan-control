@@ -1,0 +1,16 @@
+[Unit]
+Description=iMac Fan Control GUI Service
+After=graphical.target
+Wants=graphical.target
+
+[Service]
+Type=simple
+User=root
+Environment=DISPLAY=:0
+Environment=XAUTHORITY=/root/.Xauthority
+ExecStart=/usr/bin/python3 /home/birger/Downloads/imac_fan_control.py
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=graphical.target

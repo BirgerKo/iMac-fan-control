@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=iMac Fan Control
+Exec=pkexec /usr/bin/python3 /home/birger/Downloads/imac_fan_control.py
+Terminal=false
+X-KDE-autostart-phase=2

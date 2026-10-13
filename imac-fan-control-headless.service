@@ -1,0 +1,14 @@
+[Unit]
+Description=iMac Fan Control Headless Service
+After=multi-user.target
+Wants=multi-user.target
+
+[Service]
+Type=simple
+User=root
+ExecStart=/usr/bin/python3 /home/birger/Downloads/imac_fan_control_headless.py
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
