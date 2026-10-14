@@ -1,6 +1,6 @@
 # iMac Fan Control Suite
 
-A collection of fan control scripts for iMac 27" Late 2009 (iMac11,1) running openSUSE Tumbleweed.
+A collection of fan control scripts for iMac 27" Late 2009 (iMac11,1) running Linux distributions including openSUSE Tumbleweed and RaspberryOS (Debian-based).
 
 ## Overview
 
@@ -10,16 +10,50 @@ Three components work together to manage fan speeds via the `applesmc` kernel mo
 |------|---------|-----|---------|
 | `imac_fan_control.py` | Interactive GUI monitor & control | Yes | Difficult (no display) |
 | `imac_fan_control_headless.py` | Automatic temp-based control, no GUI | No | Yes |
+| `install.sh` | Automated installation script | N/A | N/A |
 | Desktop autostart (`.desktop`) | Start GUI on user login | Yes | N/A |
 | Service files (`.service`) | Start scripts as systemd services | N/A | Yes |
 
 ## Quick Start
 
+### Option 0: Automated Installation (Recommended)
+
+Use the included installation script for easy setup:
+
+```bash
+# Clone the repository
+ git clone https://github.com/BirgerKo/imac-fan-control.git
+ cd imac-fan-control
+
+# Run the installer (as root)
+ sudo ./install.sh
+```
+
+The installer will:
+- Detect your OS (openSUSE or Debian/RaspberryOS)
+- Install required kernel modules
+- Install Python dependencies
+- Copy files to `/opt/imac-fan-control/`
+- Set up the headless service
+- Configure GUI autostart
+
+**Installer options:**
+```bash
+sudo ./install.sh              # Install both GUI and headless
+sudo ./install.sh --headless   # Install headless service only
+sudo ./install.sh --gui         # Install GUI only
+sudo ./install.sh --uninstall   # Remove everything
+```
+
 ### Prerequisites
+
+All distributions require the `applesmc` and `coretemp` kernel modules:
 ```bash
 sudo modprobe applesmc
 sudo modprobe coretemp
 ```
+
+**Note:** On RaspberryOS (Debian-based), you may need to install the `applesmc-dkms` package or build from source. The `install.sh` script handles this automatically.
 
 ### Option 1: GUI Mode (Manual + Monitor)
 Run interactively with desktop autostart:
@@ -79,6 +113,7 @@ Runs as root service; monitors TS0V temp and adjusts fan2 automatically.
 .
 ├── imac_fan_control.py                    # GUI app
 ├── imac_fan_control_headless.py           # Headless daemon
+├── install.sh                             # Automated installation script
 ├── imac-fan-control.desktop               # GUI autostart entry
 ├── imac-fan-control.service               # GUI systemd (optional, fragile)
 ├── imac-fan-control-headless.service      # Headless systemd (recommended)
@@ -100,6 +135,37 @@ cd imac-fan-control
 
 Copy all files to your target location (e.g., `~/imac-fan-control/`).
 
+### RaspberryOS / Debian-Specific Setup
+
+RaspberryOS (Debian-based) requires the `applesmc` kernel module, which may need manual installation:
+
+#### Option A: Install from DKMS (if available)
+```bash
+sudo apt update
+sudo apt install -y dkms applesmc-dkms
+```
+
+#### Option B: Build from Source (most reliable)
+```bash
+# Install build dependencies
+sudo apt install -y git build-essential
+
+# Clone and build applesmc
+git clone https://github.com/guillaumevincent/applesmc.git
+cd applesmc
+make
+sudo make install
+
+# Load the module
+sudo modprobe applesmc
+```
+
+#### Option C: Use the Install Script (Recommended)
+```bash
+sudo ./install.sh
+```
+The install script automatically handles module installation for both openSUSE and Debian-based systems.
+
 #### Headless service (recommended)
 ```bash
 sudo cp imac-fan-control-headless.service /etc/systemd/system/
@@ -117,6 +183,13 @@ chmod +x ~/.config/autostart/imac-fan-control.desktop
 # Log out and back in to activate
 ```
 **Note:** Update the `Exec=` path in the `.desktop` file to point to your local `imac_fan_control.py` location.
+
+#### Using the Install Script (Recommended)
+The `install.sh` script automates all installation steps:
+```bash
+sudo ./install.sh
+```
+This will handle OS detection, kernel module installation, file placement, and service setup automatically.
 
 ## Troubleshooting
 
@@ -162,4 +235,5 @@ For applesmc kernel module issues, see:
 ---
 
 **Created:** 2026-03-24  
-**Target:** openSUSE Tumbleweed, iMac 27" Late 2009
+**Updated:** 2026-10-13  
+**Target:** openSUSE Tumbleweed, RaspberryOS (Debian-based), iMac 27" Late 2009
